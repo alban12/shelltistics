@@ -1,48 +1,46 @@
 #!/bin/bash
 
-if [ $# -eq 1 ] && [ -f $1 ] && [ ! -z $1 ] #Vérifie qu'il y a bien un paramètre et que c'est un fichier en premier  
+if [ $# -eq 1 ] && [ -f $1 ] && [ ! -z $1 ] #Verify there's a parameter and that it is a file 
 then
 	for lettre in {A..Z} 
 		do
-			echo "$(grep $lettre $1 | wc -w) - $lettre" #On compte le nombre de fois que la lettre apparait dans le dico 	
+			echo "$(grep $lettre $1 | wc -w) - $lettre" #Count the number of times the number appears in the file 
 		done | sort -hr 
-elif [ $# -eq 2 ] && [ -f $1 ] && [ $2 = "--position" ] #2ème option qui donne des statistiques de position pour chaque lettre, mais qui prend beaucoup trop de temps pour des fichiers très gros 
+elif [ $# -eq 2 ] && [ -f $1 ] && [ $2 = "--position" ] #second option that gives statistics of position for each letter 
 then 
 	for lettre in {A..Z} 
 		do
-			declare -ai positions=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0) #On declare un tableau de dimension 25 (taille du mot le plus long possible) pour relever le nombre de fois que la lettre en cours de traitement apparait à chaque position  
-			for line in $(grep $lettre $1) #On parcourt chaque mot contenant la lettre en cours de traitement  
+			declare -ai positions=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0) #We declare a tab of size 25 (Longest possible word in french) to count the number of times a letter that is treated appears at each position 
+			for line in $(grep $lettre $1) #We go through every words containing the letter treated 
 			do
-				for i in `seq 0 ${#line}` #On parcourt chaque lettre de chaque mot pour pouvoir relever les positions de la lettre en cours de traitement 
+				for i in `seq 0 ${#line}` #We go through every letter of the words to get their position
 				do 
-					lettredumot="${line:$i:1}" #On récupère chaque lettre du mot dans une variable pour la comparer avec la lettre en cours de traitement
+					lettredumot="${line:$i:1}" #We get every letter of the word to compare it with the current treated letter 
 					if [ "$lettredumot" = $lettre ] 
 					then 
-						let positions[i]++; #On indique que la lettre apparait à la position i en incrémentant le tableau des positions  
+						let positions[i]++; #We indicate that the letter appear at the position i by incrementing it in the table 
 					fi  
 				done
 			done
 
-			#On a maintenant le tableau indiquant pour chaque case (représentant une position) le nombre de fois où la lettre est apparue  
+			#We now compare the the cases of the table to determine the max (the position in which the letter has appeared the most) and the number of times it has
 
-			#On va maintenant comparer les cases du tableau pour déterminer le max (position où la lettre apparait le plus) et son indice  
-
-			max=${positions[0]} #On initialise le max au premier élément du tableau pour le comparer avec le reste du tableau
-			i=0; #On crée une variable i pour garder le numéro de case dans le parcours du tableau
-			indicemax=1; #On crée une variable indicemax qui va prendre l'indice dans lequel se trouve le max du tableau 
+			max=${positions[0]} #We initialise the max to the first element of the tab to compare it with the rest
+			i=0; #i will keep the number of the numbre of the case in the table traversal 
+			indicemax=1; #indicemax keep the index in which the max is 
 			for n in "${positions[@]}" ; do
 			let i++;  
-    			((n > max)) && max=$n && indicemax=$i #Si la valeur de la position[i] est supérieure au max, on la défini comme le nouveau max et c'est donc à cette position i que la lettre apparait le plus donc on l'affecte à indicemax   
+    			((n > max)) && max=$n && indicemax=$i #If the value of position[i] is gt max, we set it as the new max and it is in this therefore in the position i that the letter appear the most so we affect it to indicemax 
 			done
 			position="la lettre $lettre apparait le plus souvent à la position : $indicemax et ce, dans $max mots "
 			echo "$(grep $lettre $1 | wc -w) - $lettre - $position"	
 		done | sort -hr
-elif  [ $# -eq 2 ] && [ -f $1 ] && [ $2 = "--inverse" ] #2eme option plus simple qui se contente d'inverser l'affichage  
+elif  [ $# -eq 2 ] && [ -f $1 ] && [ $2 = "--inverse" ] #Another option that inverse the way the command is printed
 then 
 	for lettre in {A..Z} 
 		do
 			echo "$(grep $lettre $1 | wc -w) - $lettre" 
-		done | sort -h #Cette fois ci l'affichage est par ordre croissant  
+		done | sort -h 
 else
 	echo "langstat: impossible d'accéder à $1: aucun fichier de ce type ou paramètres non définies"
 fi
